@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAB-5 | Student Admission Form</title>
+  <style>
+    :root {
+      --navy: #172554;
+      --blue: #3457d5;
+      --blue-dark: #2846b8;
+      --text: #182230;
+      --muted: #667085;
+      --line: #dfe5ef;
+      --surface: #ffffff;
+      --page: #f3f6fc;
+      --success: #137547;
+      --success-bg: #e9f8ef;
+      --error: #b42318;
+      --radius: 16px;
+      --shadow: 0 18px 55px rgba(28, 48, 97, 0.11);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 0%, #e4ebff 0, transparent 32%), var(--page);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 5.5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: .2px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px;
+      border-radius: 11px; background: #fff; color: var(--blue); font-weight: 900;
+    }
+    .topbar small { color: #d4ddff; font-size: .82rem; }
+
+    .page-wrap { width: min(1060px, calc(100% - 32px)); margin: 38px auto 48px; }
+    .intro { text-align: center; margin: 0 auto 26px; max-width: 720px; animation: rise-in .55s ease both; }
+    .eyebrow {
+      display: inline-block; padding: 5px 11px; border-radius: 999px;
+      background: #e5eaff; color: var(--blue-dark); font-size: .76rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    h1 { color: var(--navy); font-size: clamp(1.8rem, 4vw, 2.65rem); line-height: 1.12; margin: 13px 0 10px; }
+    .intro p { margin: 0; color: var(--muted); }
+
+    .form-card {
+      background: var(--surface); border: 1px solid #e5eaf3; border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden; animation: rise-in .7s ease both;
+    }
+    .form-heading {
+      padding: 22px 28px; background: linear-gradient(110deg, #f8faff, #edf2ff);
+      border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    }
+    .form-heading h2 { font-size: 1.08rem; margin: 0; color: var(--navy); }
+    .form-heading p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; }
+    .required-note { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+    .required-note span, .required { color: var(--error); }
+
+    form { padding: 25px 28px 28px; }
+    fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+    fieldset + fieldset { margin-top: 27px; padding-top: 24px; border-top: 1px solid var(--line); }
+    legend { width: 100%; margin-bottom: 17px; font-size: 1rem; font-weight: 800; color: var(--navy); }
+    .section-number {
+      display: inline-grid; place-items: center; width: 27px; height: 27px; margin-right: 8px;
+      border-radius: 8px; color: var(--blue); background: #edf1ff; font-size: .82rem;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 20px; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label, .group-label { display: block; margin-bottom: 7px; font-size: .88rem; font-weight: 650; color: #344054; }
+    input, select, textarea {
+      width: 100%; min-height: 45px; border: 1px solid #cfd7e5; border-radius: 9px;
+      padding: 10px 12px; font: inherit; font-size: .92rem; color: var(--text); background: #fff;
+      outline: none; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    textarea { min-height: 94px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #98a2b3; }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(52, 87, 213, .12); }
+    input:invalid:not(:placeholder-shown) { border-color: #d92d20; }
+
+    .choice-row { display: flex; flex-wrap: wrap; gap: 10px 18px; padding-top: 4px; }
+    .choice { display: inline-flex; align-items: center; gap: 7px; margin: 0; font-size: .9rem; font-weight: 500; }
+    .choice input { width: 16px; min-height: auto; height: 16px; margin: 0; accent-color: var(--blue); }
+    .helper { display: block; margin-top: 5px; font-size: .77rem; color: var(--muted); }
+
+    .consent { display: flex; align-items: flex-start; gap: 10px; margin: 24px 0 18px; color: #475467; font-size: .86rem; }
+    .consent input { width: 17px; min-height: auto; height: 17px; margin: 3px 0 0; flex: 0 0 auto; accent-color: var(--blue); }
+    .actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 10px; padding: 12px 19px; min-height: 45px; font: inherit; font-size: .92rem; font-weight: 750; cursor: pointer; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; }
+    button:hover { transform: translateY(-2px); }
+    .btn-reset { color: #344054; background: #eef1f6; }
+    .btn-reset:hover { background: #e1e6ef; }
+    .btn-submit { color: #fff; background: var(--blue); box-shadow: 0 7px 15px rgba(52, 87, 213, .2); }
+    .btn-submit:hover { background: var(--blue-dark); box-shadow: 0 10px 20px rgba(52, 87, 213, .25); }
+    .message { display: none; margin-top: 18px; padding: 13px 15px; border-radius: 10px; font-size: .9rem; }
+    .message.show { display: block; animation: rise-in .25s ease both; }
+    .message.success { color: var(--success); background: var(--success-bg); border: 1px solid #b7e7c9; }
+    .message.error { color: var(--error); background: #fff0ef; border: 1px solid #ffd0cc; }
+    footer { text-align: center; padding: 0 16px 26px; color: #7a8699; font-size: .8rem; }
+
+    @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Tablet layout */
+    @media (max-width: 768px) {
+      .page-wrap { width: min(700px, calc(100% - 28px)); margin-top: 28px; }
+      .form-heading { padding: 20px 22px; }
+      form { padding: 23px 22px 25px; }
+      .grid { gap: 15px; }
+    }
+
+    /* Mobile layout: form fields stack in one column */
+    @media (max-width: 540px) {
+      .topbar { padding: 12px 16px; }
+      .topbar small { display: none; }
+      .page-wrap { width: calc(100% - 20px); margin: 22px auto 30px; }
+      .intro { margin-bottom: 20px; }
+      .intro p { font-size: .9rem; }
+      .form-card { border-radius: 13px; }
+      .form-heading { align-items: flex-start; flex-direction: column; gap: 5px; padding: 18px; }
+      form { padding: 20px 17px 22px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; }
+      .field.full { grid-column: auto; }
+      fieldset + fieldset { margin-top: 23px; padding-top: 20px; }
+      legend { margin-bottom: 14px; }
+      .required-note { white-space: normal; }
+      .actions { flex-direction: column-reverse; }
+      .actions button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">U</span><span>UniApply <small style="display:block;font-weight:500;letter-spacing:0">Student Admissions</small></span></div>
+    <small>Admission Form · Academic Year 2026–27</small>
+  </header>
+
+  <main class="page-wrap">
+    <section class="intro">
+      <span class="eyebrow">Student registration</span>
+      <h1>Start your next chapter.</h1>
+      <p>Complete the form below to submit your student admission application.</p>
+    </section>
+
+    <section class="form-card" aria-labelledby="form-title">
+      <div class="form-heading">
+        <div><h2 id="form-title">Student Admission Form</h2><p>Please enter accurate information in all required fields.</p></div>
+        <div class="required-note"><span>*</span> Required fields</div>
+      </div>
+
+      <form id="admissionForm">
+        <fieldset>
+          <legend><span class="section-number">01</span>Personal information</legend>
+          <div class="grid">
+            <div class="field"><label for="fullName">Full name <span class="required">*</span></label><input id="fullName" name="fullName" type="text" placeholder="Enter your full name" autocomplete="name" required minlength="2" /></div>
+            <div class="field"><label for="dob">Date of birth <span class="required">*</span></label><input id="dob" name="dob" type="date" required /></div>
+            <div class="field"><span class="group-label">Gender <span class="required">*</span></span><div class="choice-row"><label class="choice"><input type="radio" name="gender" value="Male" required /> Male</label><label class="choice"><input type="radio" name="gender" value="Female" /> Female</label><label class="choice"><input type="radio" name="gender" value="Other" /> Other</label></div></div>
+            <div class="field"><label for="email">Email address <span class="required">*</span></label><input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required /></div>
+            <div class="field"><label for="phone">Mobile number <span class="required">*</span></label><input id="phone" name="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel" pattern="[0-9]{10}" maxlength="10" inputmode="numeric" required /><span class="helper">Enter 10 digits without spaces or country code.</span></div>
+            <div class="field"><label for="nationality">Nationality</label><input id="nationality" name="nationality" type="text" placeholder="e.g., Indian" value="Indian" /></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="section-number">02</span>Academic information</legend>
+          <div class="grid">
+            <div class="field"><label for="course">Course applying for <span class="required">*</span></label><select id="course" name="course" required><option value="" selected disabled>Select a course</option><option>B.Tech</option><option>B.Sc</option><option>B.Com</option><option>BBA</option><option>BA</option><option>M.Tech</option><option>MBA</option><option>MCA</option><option>Other</option></select></div>
+            <div class="field"><label for="studyMode">Mode of study <span class="required">*</span></label><select id="studyMode" name="studyMode" required><option value="" selected disabled>Select study mode</option><option>Full-time</option><option>Part-time</option><option>Distance learning</option></select></div>
+            <div class="field"><label for="qualification">Last qualification <span class="required">*</span></label><select id="qualification" name="qualification" required><option value="" selected disabled>Select qualification</option><option>Class 10</option><option>Intermediate / Class 12</option><option>Diploma</option><option>Bachelor's degree</option><option>Master's degree</option><option>Other</option></select></div>
+            <div class="field"><label for="percentage">Marks / percentage (%)</label><input id="percentage" name="percentage" type="number" placeholder="e.g., 85.5" min="0" max="100" step="0.01" /></div>
+            <div class="field full"><label for="institution">Last attended school / college</label><input id="institution" name="institution" type="text" placeholder="Enter institution name" /></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="section-number">03</span>Parent / guardian details</legend>
+          <div class="grid">
+            <div class="field"><label for="guardian">Parent / guardian name <span class="required">*</span></label><input id="guardian" name="guardian" type="text" placeholder="Enter parent or guardian name" required minlength="2" /></div>
+            <div class="field"><label for="guardianPhone">Guardian mobile number <span class="required">*</span></label><input id="guardianPhone" name="guardianPhone" type="tel" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" inputmode="numeric" required /></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="section-number">04</span>Address details</legend>
+          <div class="grid">
+            <div class="field full"><label for="address">Address <span class="required">*</span></label><textarea id="address" name="address" placeholder="House number, street, locality" autocomplete="street-address" required></textarea></div>
+            <div class="field"><label for="city">City / town <span class="required">*</span></label><input id="city" name="city" type="text" placeholder="Enter city or town" autocomplete="address-level2" required /></div>
+            <div class="field"><label for="state">State <span class="required">*</span></label><input id="state" name="state" type="text" placeholder="Enter state" autocomplete="address-level1" required /></div>
+            <div class="field"><label for="pincode">PIN code <span class="required">*</span></label><input id="pincode" name="pincode" type="text" placeholder="6-digit PIN code" pattern="[0-9]{6}" maxlength="6" inputmode="numeric" autocomplete="postal-code" required /></div>
+            <div class="field"><label for="country">Country <span class="required">*</span></label><input id="country" name="country" type="text" value="India" autocomplete="country-name" required /></div>
+          </div>
+        </fieldset>
+
+        <label class="consent"><input id="consent" name="consent" type="checkbox" required /><span>I confirm that the information provided in this form is true and correct to the best of my knowledge. <span class="required">*</span></span></label>
+        <div class="actions"><button type="reset" class="btn-reset">Clear form</button><button type="submit" class="btn-submit">Submit application <span aria-hidden="true">→</span></button></div>
+        <div id="formMessage" class="message" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+  <footer>LAB-5 · Front End Development Frameworks for Web Applications</footer>
+
+  <script>
+    const form = document.getElementById('admissionForm');
+    const message = document.getElementById('formMessage');
+    const dob = document.getElementById('dob');
+
+    // Prevent selecting a future date of birth.
+    dob.max = new Date().toISOString().split('T')[0];
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      message.className = 'message';
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const studentName = document.getElementById('fullName').value.trim();
+      message.textContent = `Thank you, ${studentName}! Your form has been validated successfully. This demo does not send data to a server.`;
+      message.className = 'message success show';
+      message.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    form.addEventListener('reset', function () {
+      message.className = 'message';
+      message.textContent = '';
+    });
+  </script>
+</body>
+</html>

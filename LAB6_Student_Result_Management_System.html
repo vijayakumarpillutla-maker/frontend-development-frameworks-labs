@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAB-6 | Student Result Management System</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --ink: #172033;
+      --muted: #6f7890;
+      --line: #e5e9f2;
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --primary-soft: #eeedff;
+      --green: #14805e;
+      --green-soft: #e7f8f0;
+      --red: #c43c4a;
+      --red-soft: #fff0f1;
+      --amber: #9a6500;
+      --amber-soft: #fff5dc;
+      --radius: 18px;
+      --shadow: 0 10px 32px rgba(35, 44, 75, .06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 16px clamp(16px, 4vw, 48px);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark {
+      display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
+      color: #fff; background: linear-gradient(135deg, #625bf4, #4238c9); font-size: 21px; font-weight: 800;
+      box-shadow: 0 7px 16px rgba(79,70,229,.22);
+    }
+    .brand h1 { margin: 0; font-size: 16px; line-height: 1.25; letter-spacing: -.2px; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .lab-chip { background: var(--primary-soft); color: var(--primary-dark); padding: 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    main { width: min(1360px, 100%); margin: 0 auto; padding: 30px clamp(16px, 4vw, 48px) 42px; }
+    .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: 1.6px; color: var(--primary); font-size: 11px; font-weight: 800; margin: 0 0 7px; }
+    .welcome h2 { margin: 0; font-size: clamp(25px, 3.4vw, 34px); letter-spacing: -1.1px; line-height: 1.12; }
+    .welcome p { color: var(--muted); margin: 9px 0 0; font-size: 14px; }
+    .date-label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 22px; }
+    .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); min-width: 0; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .stat-icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-size: 17px; }
+    .stat-value { margin-top: 12px; font-weight: 800; font-size: 28px; letter-spacing: -.7px; line-height: 1.1; }
+    .stat-note { margin-top: 7px; font-size: 11px; color: var(--muted); }
+    .layout { display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1fr); gap: 20px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); min-width: 0; overflow: hidden; }
+    .panel-head { padding: 20px 21px 16px; border-bottom: 1px solid var(--line); }
+    .panel-head h3 { margin: 0; font-size: 16px; letter-spacing: -.2px; }
+    .panel-head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .form-body { padding: 20px 21px 22px; }
+    .section-label { color: #8b93a8; font-size: 10px; font-weight: 800; letter-spacing: 1.35px; text-transform: uppercase; margin: 4px 0 12px; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 11px; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; font-size: 11px; font-weight: 750; color: #596178; margin-bottom: 6px; }
+    input, select {
+      width: 100%; min-width: 0; border: 1px solid #dfe4ef; border-radius: 10px; padding: 10px 11px;
+      color: var(--ink); background: #fff; outline: none; transition: border-color .18s, box-shadow .18s;
+    }
+    input { height: 40px; }
+    select { height: 40px; }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.11); }
+    input::placeholder { color: #adb3c2; }
+    .divider { height: 1px; background: var(--line); margin: 20px 0 17px; }
+    .mark-field input { text-align: right; font-variant-numeric: tabular-nums; }
+    .marks-preview { margin-top: 17px; padding: 13px; background: #f7f7ff; border: 1px solid #e8e7ff; border-radius: 13px; }
+    .preview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .preview-item span { display: block; font-size: 10px; color: var(--muted); }
+    .preview-item strong { display: block; font-size: 16px; margin-top: 3px; }
+    .buttons { display: flex; gap: 9px; margin-top: 17px; }
+    .btn { border: 1px solid transparent; padding: 10px 13px; border-radius: 10px; font-size: 12px; font-weight: 800; transition: transform .15s, background .15s, box-shadow .15s; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--primary); color: white; flex: 1; box-shadow: 0 5px 12px rgba(79,70,229,.18); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { color: #4d5570; background: white; border-color: var(--line); }
+    .btn-secondary:hover { background: #f8f9fd; }
+    .btn-small { padding: 8px 10px; }
+    .table-panel { min-width: 0; }
+    .table-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 13px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .table-title h3 { margin: 0; font-size: 16px; }
+    .table-title p { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+    .tools { display: flex; align-items: center; gap: 8px; }
+    .searchbox { position: relative; }
+    .searchbox span { position: absolute; left: 11px; top: 8px; color: #939bb0; }
+    .searchbox input { height: 37px; width: 195px; padding: 8px 10px 8px 32px; font-size: 12px; }
+    .filter { height: 37px; width: 115px; font-size: 12px; padding: 7px 8px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 730px; text-align: left; }
+    thead { background: #f9faff; }
+    th { padding: 12px 13px; font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: #7e879d; font-weight: 800; white-space: nowrap; }
+    td { padding: 13px; font-size: 12px; border-top: 1px solid #eff1f6; white-space: nowrap; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: #fafaff; }
+    .student-cell { display: flex; align-items: center; gap: 9px; }
+    .avatar { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 10px; background: var(--primary-soft); color: var(--primary-dark); display: grid; place-items: center; font-size: 10px; font-weight: 900; }
+    .student-name { font-weight: 800; color: #202941; }
+    .student-id { margin-top: 2px; font-size: 10px; color: var(--muted); }
+    .score { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .grade { display: inline-flex; justify-content: center; min-width: 30px; border-radius: 7px; padding: 4px 7px; font-weight: 900; background: var(--primary-soft); color: var(--primary-dark); }
+    .status { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; padding: 5px 8px; border-radius: 999px; font-weight: 850; }
+    .status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .passed { background: var(--green-soft); color: var(--green); }
+    .failed { background: var(--red-soft); color: var(--red); }
+    .actions { display: flex; gap: 6px; }
+    .icon-btn { border: 1px solid var(--line); border-radius: 8px; background: white; color: #66708a; width: 29px; height: 29px; display: grid; place-items: center; font-size: 13px; }
+    .icon-btn:hover { background: var(--primary-soft); color: var(--primary); border-color: #d7d4ff; }
+    .icon-btn.delete:hover { background: var(--red-soft); border-color: #ffd6d9; color: var(--red); }
+    .empty { text-align: center; padding: 42px 15px; color: var(--muted); font-size: 13px; }
+    .empty strong { display: block; color: var(--ink); font-size: 14px; margin-bottom: 5px; }
+    .table-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .legend { display: flex; align-items: center; gap: 13px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+    .dot.green { background: var(--green); } .dot.red { background: var(--red); }
+    .toast { position: fixed; right: 22px; bottom: 22px; max-width: min(380px, calc(100vw - 32px)); padding: 13px 17px; background: #172033; color: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.2); font-size: 13px; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .footer-note { text-align: center; color: #8a92a5; font-size: 11px; margin-top: 22px; }
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 1fr; }
+      .form-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+      .form-body .section-label:first-child, .form-body .field-grid:first-of-type { grid-column: 1; }
+      .form-body .divider, .form-body .marks-preview, .form-body .buttons { grid-column: 1 / -1; }
+      .form-body .section-label:nth-of-type(2), .form-body .field-grid:nth-of-type(2) { grid-column: 2; }
+    }
+    @media (max-width: 760px) {
+      main { padding-top: 22px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+      .stat { padding: 14px; }
+      .stat-value { font-size: 24px; }
+      .welcome { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .form-body { display: block; }
+      .table-toolbar { align-items: flex-start; flex-direction: column; }
+      .tools { width: 100%; }
+      .searchbox { flex: 1; }
+      .searchbox input { width: 100%; }
+      .filter { width: 125px; flex-shrink: 0; }
+      .table-footer { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 420px) {
+      .brand p { display: none; }
+      .lab-chip { font-size: 10px; padding: 6px 8px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .tools { flex-wrap: wrap; }
+      .searchbox { flex-basis: 100%; }
+      .filter { flex: 1; width: auto; }
+      .preview-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">R</div>
+      <div><h1>Resultly <span style="font-weight:500;color:#8a92a5">/ Student Portal</span></h1><p>Student Result Management System</p></div>
+    </div>
+    <div class="lab-chip">FRONT END LAB · 06</div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div><p class="eyebrow">Academic overview</p><h2>Student results dashboard</h2><p>Record marks, calculate grades, and manage student performance in one place.</p></div>
+      <div class="date-label" id="todayLabel"></div>
+    </section>
+
+    <section class="stats" aria-label="Result summary">
+      <article class="stat"><div class="stat-top"><span>Total students</span><span class="stat-icon">♙</span></div><div class="stat-value" id="totalStudents">0</div><div class="stat-note">Students in this result list</div></article>
+      <article class="stat"><div class="stat-top"><span>Pass percentage</span><span class="stat-icon" style="background:var(--green-soft);color:var(--green)">✓</span></div><div class="stat-value" id="passRate">0%</div><div class="stat-note" id="passNote">No records yet</div></article>
+      <article class="stat"><div class="stat-top"><span>Class average</span><span class="stat-icon" style="background:#fff5dc;color:#9a6500">↗</span></div><div class="stat-value" id="classAverage">0%</div><div class="stat-note">Average percentage across records</div></article>
+      <article class="stat"><div class="stat-top"><span>Top percentage</span><span class="stat-icon" style="background:#e8f4ff;color:#2373ba">★</span></div><div class="stat-value" id="topScore">0%</div><div class="stat-note" id="topStudentNote">Highest student score</div></article>
+    </section>
+
+    <section class="layout">
+      <aside class="panel" aria-labelledby="formTitle">
+        <div class="panel-head"><h3 id="formTitle">Add student result</h3><p>Enter student details and subject-wise marks.</p></div>
+        <form id="resultForm" class="form-body">
+          <div class="section-label">Student information</div>
+          <div class="field-grid">
+            <div class="field"><label for="studentName">Full name *</label><input id="studentName" name="studentName" placeholder="e.g. Asha Kumar" required maxlength="70" /></div>
+            <div class="field"><label for="rollNo">Roll number *</label><input id="rollNo" name="rollNo" placeholder="e.g. 24CSE101" required maxlength="25" /></div>
+            <div class="field"><label for="course">Course / Branch *</label><select id="course" name="course" required><option value="">Select course</option><option>B.Tech CSE</option><option>B.Tech ECE</option><option>B.Tech EEE</option><option>B.Tech Civil</option><option>B.Tech Mechanical</option><option>BCA</option><option>B.Sc</option><option>B.Com</option><option>Other</option></select></div>
+            <div class="field"><label for="semester">Semester *</label><select id="semester" name="semester" required><option value="">Select semester</option><option>Semester 1</option><option>Semester 2</option><option>Semester 3</option><option>Semester 4</option><option>Semester 5</option><option>Semester 6</option><option>Semester 7</option><option>Semester 8</option></select></div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Subject marks · out of 100</div>
+          <div class="field-grid">
+            <div class="field mark-field"><label for="mark1">Subject 1 *</label><input id="mark1" class="mark-input" type="number" min="0" max="100" step="1" placeholder="0–100" required /></div>
+            <div class="field mark-field"><label for="mark2">Subject 2 *</label><input id="mark2" class="mark-input" type="number" min="0" max="100" step="1" placeholder="0–100" required /></div>
+            <div class="field mark-field"><label for="mark3">Subject 3 *</label><input id="mark3" class="mark-input" type="number" min="0" max="100" step="1" placeholder="0–100" required /></div>
+            <div class="field mark-field"><label for="mark4">Subject 4 *</label><input id="mark4" class="mark-input" type="number" min="0" max="100" step="1" placeholder="0–100" required /></div>
+            <div class="field mark-field full"><label for="mark5">Subject 5 *</label><input id="mark5" class="mark-input" type="number" min="0" max="100" step="1" placeholder="0–100" required /></div>
+          </div>
+          <div class="marks-preview" aria-live="polite">
+            <div class="preview-grid"><div class="preview-item"><span>Total marks</span><strong id="previewTotal">0 / 500</strong></div><div class="preview-item"><span>Percentage</span><strong id="previewPercent">0.0%</strong></div><div class="preview-item"><span>Grade</span><strong id="previewGrade">—</strong></div></div>
+          </div>
+          <div class="buttons"><button class="btn btn-primary" id="submitButton" type="submit">＋ Save result</button><button class="btn btn-secondary" id="clearButton" type="button">Clear</button></div>
+        </form>
+      </aside>
+
+      <section class="panel table-panel" aria-labelledby="recordsTitle">
+        <div class="table-toolbar">
+          <div class="table-title"><h3 id="recordsTitle">Student records</h3><p>Review, edit, or remove student results.</p></div>
+          <div class="tools"><div class="searchbox"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" aria-label="Search students" placeholder="Search name or roll no." /></div><select class="filter" id="statusFilter" aria-label="Filter results"><option value="all">All results</option><option value="Pass">Passed</option><option value="Fail">Failed</option></select><button class="btn btn-secondary btn-small" id="exportButton" type="button" title="Download CSV">⇩ Export</button></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Course</th><th>Sem.</th><th>Total / 500</th><th>Percent</th><th>Grade</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="resultRows"></tbody>
+          </table>
+          <div id="emptyState" class="empty" hidden><strong>No student records found</strong>Try another search or add a new student result.</div>
+        </div>
+        <div class="table-footer"><span id="recordCount">Showing 0 students</span><div class="legend"><span><i class="dot green"></i> Passed</span><span><i class="dot red"></i> Failed</span></div></div>
+      </section>
+    </section>
+    <p class="footer-note">Student Result Management System · Front End Development Frameworks for Web Applications · LAB-6</p>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // Demo data is saved in this browser only; no server or database is connected.
+  const STORAGE_KEY = 'lab6_student_results_v1';
+  const sampleResults = [
+    { id: 'r1', name: 'Aarav Reddy', roll: '24CSE101', course: 'B.Tech CSE', semester: 'Semester 2', marks: [92, 88, 95, 81, 90] },
+    { id: 'r2', name: 'Diya Sharma', roll: '24CSE102', course: 'B.Tech CSE', semester: 'Semester 2', marks: [86, 91, 89, 94, 87] },
+    { id: 'r3', name: 'Rahul Verma', roll: '24ECE014', course: 'B.Tech ECE', semester: 'Semester 2', marks: [68, 74, 59, 80, 72] },
+    { id: 'r4', name: 'Ananya Das', roll: '24CIV007', course: 'B.Tech Civil', semester: 'Semester 2', marks: [32, 46, 29, 51, 40] }
+  ];
+  let records = loadRecords();
+  let editingId = null;
+  let toastTimer;
+
+  function loadRecords() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored !== null) return JSON.parse(stored);
+    } catch (error) { console.warn('Browser storage is unavailable.', error); }
+    return sampleResults.map(item => ({ ...item, marks: [...item.marks] }));
+  }
+  function persistRecords() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+    catch (error) { showToast('Could not save in browser storage. You can still use this page during this session.'); }
+  }
+  function resultFor(marks) {
+    const total = marks.reduce((sum, mark) => sum + Number(mark), 0);
+    const percentage = total / marks.length;
+    const passed = marks.every(mark => Number(mark) >= 35);
+    let grade = 'F';
+    if (passed) {
+      if (percentage >= 90) grade = 'A+';
+      else if (percentage >= 80) grade = 'A';
+      else if (percentage >= 70) grade = 'B';
+      else if (percentage >= 60) grade = 'C';
+      else if (percentage >= 50) grade = 'D';
+      else grade = 'E';
+    }
+    return { total, percentage, grade, status: passed ? 'Pass' : 'Fail' };
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  }
+  function initials(name) { return name.trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase(); }
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message; toast.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+  function getFilteredRecords() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filter = document.getElementById('statusFilter').value;
+    return records.filter(record => {
+      const info = resultFor(record.marks);
+      const matchesQuery = `${record.name} ${record.roll} ${record.course} ${record.semester}`.toLowerCase().includes(query);
+      return matchesQuery && (filter === 'all' || info.status === filter);
+    });
+  }
+  function render() {
+    const rows = document.getElementById('resultRows');
+    const filtered = getFilteredRecords();
+    rows.innerHTML = filtered.map(record => {
+      const result = resultFor(record.marks);
+      return `<tr>
+        <td><div class="student-cell"><div class="avatar">${escapeHTML(initials(record.name))}</div><div><div class="student-name">${escapeHTML(record.name)}</div><div class="student-id">${escapeHTML(record.roll)}</div></div></div></td>
+        <td>${escapeHTML(record.course)}</td><td>${escapeHTML(record.semester.replace('Semester ', 'Sem '))}</td>
+        <td class="score">${result.total} / 500</td><td class="score">${result.percentage.toFixed(1)}%</td><td><span class="grade">${result.grade}</span></td>
+        <td><span class="status ${result.status === 'Pass' ? 'passed' : 'failed'}">${result.status === 'Pass' ? 'Passed' : 'Failed'}</span></td>
+        <td><div class="actions"><button class="icon-btn" type="button" title="Edit ${escapeHTML(record.name)}" aria-label="Edit ${escapeHTML(record.name)}" data-action="edit" data-id="${escapeHTML(record.id)}">✎</button><button class="icon-btn delete" type="button" title="Delete ${escapeHTML(record.name)}" aria-label="Delete ${escapeHTML(record.name)}" data-action="delete" data-id="${escapeHTML(record.id)}">×</button></div></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('emptyState').hidden = filtered.length !== 0;
+    document.getElementById('recordCount').textContent = `Showing ${filtered.length} of ${records.length} student${records.length === 1 ? '' : 's'}`;
+    const results = records.map(record => resultFor(record.marks));
+    const total = records.length;
+    const passed = results.filter(result => result.status === 'Pass').length;
+    const average = total ? results.reduce((sum, result) => sum + result.percentage, 0) / total : 0;
+    const topRecord = total ? records[results.reduce((best, result, index) => result.percentage > results[best].percentage ? index : best, 0)] : null;
+    document.getElementById('totalStudents').textContent = total;
+    document.getElementById('passRate').textContent = `${total ? Math.round(passed / total * 100) : 0}%`;
+    document.getElementById('passNote').textContent = total ? `${passed} passed · ${total - passed} failed` : 'No records yet';
+    document.getElementById('classAverage').textContent = `${average.toFixed(1)}%`;
+    document.getElementById('topScore').textContent = `${topRecord ? resultFor(topRecord.marks).percentage.toFixed(1) : '0.0'}%`;
+    document.getElementById('topStudentNote').textContent = topRecord ? topRecord.name : 'Highest student score';
+  }
+  function updatePreview() {
+    const inputs = [...document.querySelectorAll('.mark-input')];
+    let marks = inputs.map(input => input.value === '' ? 0 : Number(input.value));
+    const total = marks.reduce((sum, mark) => sum + mark, 0);
+    const result = resultFor(marks);
+    document.getElementById('previewTotal').textContent = `${total} / 500`;
+    document.getElementById('previewPercent').textContent = `${result.percentage.toFixed(1)}%`;
+    document.getElementById('previewGrade').textContent = inputs.every(input => input.value !== '') ? result.grade : '—';
+  }
+  function resetForm() {
+    document.getElementById('resultForm').reset();
+    editingId = null;
+    document.getElementById('formTitle').textContent = 'Add student result';
+    document.getElementById('submitButton').textContent = '＋ Save result';
+    document.getElementById('rollNo').readOnly = false;
+    document.querySelectorAll('.mark-input').forEach(input => input.setCustomValidity(''));
+    updatePreview();
+  }
+  document.querySelectorAll('.mark-input').forEach(input => {
+    input.addEventListener('input', () => {
+      if (input.value !== '' && (Number(input.value) < 0 || Number(input.value) > 100)) input.setCustomValidity('Marks must be between 0 and 100.');
+      else input.setCustomValidity('');
+      updatePreview();
+    });
+  });
+  document.getElementById('resultForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = document.getElementById('studentName').value.trim();
+    const roll = document.getElementById('rollNo').value.trim();
+    const course = document.getElementById('course').value;
+    const semester = document.getElementById('semester').value;
+    const marks = [...document.querySelectorAll('.mark-input')].map(input => Number(input.value));
+    if (!name || !roll || !course || !semester || marks.some(mark => !Number.isFinite(mark) || mark < 0 || mark > 100)) {
+      showToast('Please complete every field and enter marks from 0 to 100.'); return;
+    }
+    const duplicate = records.some(record => record.roll.toLowerCase() === roll.toLowerCase() && record.id !== editingId);
+    if (duplicate) { document.getElementById('rollNo').setCustomValidity('This roll number already exists.'); document.getElementById('rollNo').reportValidity(); return; }
+    document.getElementById('rollNo').setCustomValidity('');
+    const record = { id: editingId || `r${Date.now()}${Math.random().toString(16).slice(2, 6)}`, name, roll, course, semester, marks };
+    if (editingId) { records = records.map(item => item.id === editingId ? record : item); showToast('Student result updated successfully.'); }
+    else { records.unshift(record); showToast('Student result saved successfully.'); }
+    persistRecords(); resetForm(); render();
+  });
+  document.getElementById('clearButton').addEventListener('click', () => { resetForm(); showToast('Form cleared.'); });
+  document.getElementById('searchInput').addEventListener('input', render);
+  document.getElementById('statusFilter').addEventListener('change', render);
+  document.getElementById('resultRows').addEventListener('click', event => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const record = records.find(item => item.id === button.dataset.id);
+    if (!record) return;
+    if (button.dataset.action === 'edit') {
+      editingId = record.id;
+      document.getElementById('studentName').value = record.name;
+      document.getElementById('rollNo').value = record.roll;
+      document.getElementById('course').value = record.course;
+      document.getElementById('semester').value = record.semester;
+      document.querySelectorAll('.mark-input').forEach((input, index) => input.value = record.marks[index]);
+      document.getElementById('formTitle').textContent = 'Edit student result';
+      document.getElementById('submitButton').textContent = '✓ Update result';
+      updatePreview(); document.getElementById('studentName').focus();
+      if (window.matchMedia('(max-width: 1050px)').matches) document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Edit the details, then select Update result.');
+    } else if (button.dataset.action === 'delete') {
+      if (!window.confirm(`Delete the result for ${record.name} (${record.roll})?`)) return;
+      records = records.filter(item => item.id !== record.id);
+      if (editingId === record.id) resetForm();
+      persistRecords(); render(); showToast('Student result deleted.');
+    }
+  });
+  document.getElementById('exportButton').addEventListener('click', () => {
+    if (!records.length) { showToast('There are no results to export.'); return; }
+    const headers = ['Name', 'Roll Number', 'Course', 'Semester', 'Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5', 'Total / 500', 'Percentage', 'Grade', 'Status'];
+    const csvCell = value => `"${String(value).replace(/"/g, '""')}"`;
+    const lines = [headers, ...records.map(record => {
+      const result = resultFor(record.marks);
+      return [record.name, record.roll, record.course, record.semester, ...record.marks, result.total, result.percentage.toFixed(1) + '%', result.grade, result.status];
+    })].map(row => row.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + lines], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = 'student_results.csv'; document.body.appendChild(anchor); anchor.click(); anchor.remove(); URL.revokeObjectURL(url);
+    showToast('CSV result sheet exported.');
+  });
+  document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date());
+  updatePreview(); render();
+</script>
+</body>
+</html>
